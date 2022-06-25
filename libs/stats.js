@@ -5,6 +5,15 @@ var os = require('os');
 var algos = require('stratum-pool/lib/algoProperties.js');
 const logger = require('./logger.js').getLogger('Stats', 'system');
 
+// redis callback Ready check failed bypass trick
+function rediscreateClient(port, host, pass) {
+    var client = redis.createClient(port, host);
+    if (pass) {
+        client.auth(pass);
+    }
+    return client;
+}
+
 function sortProperties(obj, sortedBy, isNumericSort, reverse) {
 	sortedBy = sortedBy || 1; // by default first key
 	isNumericSort = isNumericSort || false; // by default text sort
@@ -54,13 +63,13 @@ module.exports = function(portalConfig, poolConfigs) {
 		}
 		redisClients.push({
 			coins: [coin],
-			client: redis.createClient(redisConfig.port, redisConfig.host)
+			client: rediscreateClient(redisConfig.port, redisConfig.host, redisConfig.password)
 		});
 	});
 	function setupStatsRedis() {
 		redisStats = redis.createClient(portalConfig.redis.port, portalConfig.redis.host);
 		redisStats.on('error', function(err) {
-			logger.error('Stats Redis Encountered An Error! Message: %s', JSON.stringify(err));
+			redisStats.auth(portalConfig.redis.password);
 		});
 	}
 	function gatherStatHistory() {

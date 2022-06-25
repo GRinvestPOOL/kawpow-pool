@@ -15,6 +15,9 @@ module.exports = function() {
 	var pools = {};
 	var proxySwitch = {};
 	var redisClient = redis.createClient(portalConfig.redis.port, portalConfig.redis.host);
+	if (portalConfig.redis.password) {
+        redisClient.auth(portalConfig.redis.password);
+    }
 	process.on('message', function(message) {
 		switch (message.type) {
 			case 'banIP':

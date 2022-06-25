@@ -99,6 +99,9 @@ function SetupForPool(poolOptions, setupFinished) {
 	var processingConfig = poolOptions.paymentProcessing;
 	var daemon = new Stratum.daemon.interface([processingConfig.daemon], loggerFactory.getLogger('CoinDaemon', coin));
 	var redisClient = redis.createClient(poolOptions.redis.port, poolOptions.redis.host);
+	if (poolOptions.redis.password) {
+        redisClient.auth(poolOptions.redis.password);
+    }
 	var totalCoinFees = getTotalFees(coin);
 	logger.debug('PP> FEE % = %s', coin.toUpperCase(), totalCoinFees.toString(10)); 
 	var coinPrecision = getCoinPrecision(coin);
